@@ -5,7 +5,6 @@ from users.models import User # Импорт User, так как Car связа�
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-# ... (копируйте и вставьте сюда методы get_car, get_cars_by_brand, add_car из предыдущего ответа) ...
 
 # Пример представления get_car (из предыдущего ответа):
 def get_car(request, vin_number):
@@ -20,8 +19,9 @@ def get_car(request, vin_number):
         }
         return JsonResponse(car_data)
     except Car.DoesNotExist:
-        return JsonResponse({'error': 'Car not found'}, status=404)
+        return JsonResponse({'error': 'Car not found, works'}, status=404)
     
+
 def get_cars_by_brand(request, brand_query):
     cars = Car.objects.filter(brand__iexact=brand_query) # __iexact - регистронезависимое точное совпадение
     cars_data = []
@@ -35,7 +35,8 @@ def get_cars_by_brand(request, brand_query):
         })
     return JsonResponse({'cars': cars_data})
 
-@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
+
+#@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
 def add_car(request):
     if request.method == 'POST':
         try:
@@ -60,8 +61,9 @@ def add_car(request):
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
     else:
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
-    
-@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
+
+
+#@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
 def update_car(request, car_id): # car_id передается в URL
     if request.method == 'PUT': # Используем PUT для обновления
         try:
@@ -96,7 +98,8 @@ def update_car(request, car_id): # car_id передается в URL
         else:
             return JsonResponse({'error': 'Only PUT method allowed'}, status=405)
 
-@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
+
+#@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
 def delete_car(request, car_id): # car_id в URL
     if request.method == 'DELETE': # Используем DELETE метод
         try:

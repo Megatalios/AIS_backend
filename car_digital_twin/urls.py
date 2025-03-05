@@ -19,7 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('cars/', include('cars.urls')),       # <-- Включаем urls.py из приложения cars
+    path('cars/', include('cars.urls')),       # <-- Включаем uxrls.py из приложения cars
     path('sensors/', include('sensors.urls')),    # <-- Включаем urls.py из приложения sensors
     path('users/', include('users.urls')),      # <-- Включаем urls.py из приложения users
 ]
