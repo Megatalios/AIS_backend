@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 
-# Пример представления get_car (из предыдущего ответа):
+# Получить машину по VIN номеру:
 def get_car(request, vin_number):
     try:
         car = Car.objects.get(vin_number=vin_number)
@@ -23,7 +23,7 @@ def get_car(request, vin_number):
     
 
 def get_cars_by_brand(request, brand_query):
-    cars = Car.objects.filter(brand__iexact=brand_query) # __iexact - регистронезависимое точное совпадение
+    cars = Car.objects.filter(brand__iexact=brand_query) # __iexact - совпадение без учета регистра
     cars_data = []
     for car in cars:
         cars_data.append({
@@ -36,7 +36,7 @@ def get_cars_by_brand(request, brand_query):
     return JsonResponse({'cars': cars_data})
 
 
-#@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
+#@csrf_exempt - защита csrf-куки (не сливки шоу)
 def add_car(request):
     if request.method == 'POST':
         try:
@@ -63,7 +63,7 @@ def add_car(request):
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
 
 
-#@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
+#@csrf_exempt
 def update_car(request, car_id): # car_id передается в URL
     if request.method == 'PUT': # Используем PUT для обновления
         try:
@@ -99,7 +99,7 @@ def update_car(request, car_id): # car_id передается в URL
             return JsonResponse({'error': 'Only PUT method allowed'}, status=405)
 
 
-#@csrf_exempt # **ВНИМАНИЕ: Убрать csrf_exempt в production и использовать CSRF защиту!**
+#@csrf_exempt 
 def delete_car(request, car_id): # car_id в URL
     if request.method == 'DELETE': # Используем DELETE метод
         try:
@@ -110,4 +110,3 @@ def delete_car(request, car_id): # car_id в URL
             return JsonResponse({'error': 'Car not found'}, status=404)
     else:
         return JsonResponse({'error': 'Only DELETE method allowed'}, status=405)
-# ... (остальные views для Car) ...
