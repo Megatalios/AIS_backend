@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'users',     # Ваше приложение users
     'cars',      # Ваше приложение cars
     'sensors',   # Ваше приложение sensors
+    #'new_table'
 ]
 
 MIDDLEWARE = [

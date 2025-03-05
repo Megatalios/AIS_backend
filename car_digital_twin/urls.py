@@ -22,4 +22,5 @@ urlpatterns = [
     path('cars/', include('cars.urls')),       # <-- Включаем uxrls.py из приложения cars
     path('sensors/', include('sensors.urls')),    # <-- Включаем urls.py из приложения sensors
     path('users/', include('users.urls')),      # <-- Включаем urls.py из приложения users
+    #path('new_table/', include('new_table.urls'))
 ]
