@@ -4,10 +4,33 @@ from .models import Car  # Импорт модели Car из cars.models
 from users.models import User # Импорт User, так как Car связан с User
 from django.views.decorators.csrf import csrf_exempt
 import json
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import api_view
+from rest_framework import serializers
 
 
-# Получить машину по VIN номеру:
+
+
+@api_view(['GET'])
+def get_all_cars(request):
+    """Получить все машины"""
+    all_cars = Car.objects.all()
+    cars_list = []
+    for car in all_cars:
+        cars_list.append({
+            'id': car.id, 
+            'vin_number': car.vin_number, 
+            'brand': car.brand,
+            'color': car.color,
+            'owner_id': car.owner.id if car.owner else None # Если owner не None, то вернуть id, если None, то вернуть None
+            })
+    return JsonResponse({'cars': cars_list})
+
+
+@api_view(['GET'])
 def get_car(request, vin_number):
+    """Получить машину по VIN номеру"""
     try:
         car = Car.objects.get(vin_number=vin_number)
         car_data = {
@@ -21,8 +44,9 @@ def get_car(request, vin_number):
     except Car.DoesNotExist:
         return JsonResponse({'error': 'Car not found, works'}, status=404)
     
-
+@api_view(['GET'])
 def get_cars_by_brand(request, brand_query):
+    """Получить все машины по заданному бренду"""
     cars = Car.objects.filter(brand__iexact=brand_query) # __iexact - совпадение без учета регистра
     cars_data = []
     for car in cars:
@@ -35,9 +59,22 @@ def get_cars_by_brand(request, brand_query):
         })
     return JsonResponse({'cars': cars_data})
 
+# Сериализатор для описания тела запроса
+class CarSerializer(serializers.Serializer):
+    vin_number = serializers.CharField()
+    color = serializers.CharField()
+    brand = serializers.CharField()
+    owner_id = serializers.IntegerField()
 
+@swagger_auto_schema(
+    method='POST',
+    request_body=CarSerializer,  # Указываем сериализатор для тела запроса
+    responses={200: 'Car added successfully'}
+)
+@api_view(['POST'])
 #@csrf_exempt - защита csrf-куки (не сливки шоу)
 def add_car(request):
+    """Добавить новую машину"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -62,9 +99,15 @@ def add_car(request):
     else:
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
 
-
+@swagger_auto_schema(
+    method='PUT',
+    request_body=CarSerializer,  # Указываем сериализатор для тела запроса
+    responses={200: 'Car updated successfully'}
+)
+@api_view(['PUT'])
 #@csrf_exempt
 def update_car(request, car_id): # car_id передается в URL
+    """Обновить существующую машину"""
     if request.method == 'PUT': # Используем PUT для обновления
         try:
             data = json.loads(request.body)
@@ -98,9 +141,10 @@ def update_car(request, car_id): # car_id передается в URL
         else:
             return JsonResponse({'error': 'Only PUT method allowed'}, status=405)
 
-
+@api_view(['DELETE'])
 #@csrf_exempt 
 def delete_car(request, car_id): # car_id в URL
+    """Удалить машину по ID"""
     if request.method == 'DELETE': # Используем DELETE метод
         try:
             car = Car.objects.get(id=car_id)
