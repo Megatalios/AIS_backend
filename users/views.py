@@ -3,9 +3,16 @@ from django.http import JsonResponse
 from .models import User  # Импорт модели User из users.models
 from django.views.decorators.csrf import csrf_exempt
 import json
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import api_view
+from rest_framework import serializers
 
-# Получить пользователя по ID
+
+
+@api_view(['GET'])
 def get_user(request, user_id):
+    """Получить пользователя по ID"""
     try:
         user = User.objects.get(id=user_id)
         user_data = {
@@ -17,8 +24,9 @@ def get_user(request, user_id):
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
     
-# Получить пользователя по имени
+@api_view(['GET'])
 def get_users_by_name(request, name_query):
+    """Получить пользователей по имени"""
     users = User.objects.filter(name__icontains=name_query) # __icontains - регистронезависимое "содержит"
     users_data = []
     for user in users:
@@ -29,17 +37,29 @@ def get_users_by_name(request, name_query):
         })
     return JsonResponse({'users': users_data}) # Возвращаем список пользователей в JSON
 
-# Получить всех пользователей (вряд ли пригодится, но для проверки - мб)
+@api_view(['GET'])
 def get_all_users(request):
+    """Получить всех пользователей"""
     all_users = User.objects.all()
     users_list = []
     for user in all_users:
         users_list.append({'id': user.id, 'name': user.name, 'email': user.email})
     return JsonResponse({'users': users_list})
 
-# CSRF защита (в реальных проектах не использовать)
-@csrf_exempt
+# Сериализатор для описания тела запроса
+class UserSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    email = serializers.EmailField()
+
+
+@swagger_auto_schema(
+    method='POST',
+    request_body=UserSerializer,  # Указываем сериализатор для тела запроса
+    responses={200: 'Car added successfully'}
+)
+@api_view(['POST'])
 def add_user(request):
+    """Добавить пользователя"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body) # Читаем JSON из тела запроса
@@ -56,10 +76,17 @@ def add_user(request):
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
     else:
         return JsonResponse({'error': 'Only POST method allowed'}, status=405) # 405 Method Not Allowed
-    
-# CSRF защита (в реальных проектах не использовать)
-@csrf_exempt
+
+
+
+@swagger_auto_schema(
+    method='PUT',
+    request_body=UserSerializer,  # Указываем сериализатор для тела запроса
+    responses={200: 'Car updated successfully'}
+)    
+@api_view(['PUT'])
 def update_user(request, user_id): # user_id передается в URL
+    """Обновить пользователя"""
     if request.method == 'PUT': # Используем PUT для обновления
         try:
             data = json.loads(request.body)
@@ -83,8 +110,7 @@ def update_user(request, user_id): # user_id передается в URL
         return JsonResponse({'error': 'Only PUT method allowed'}, status=405)
 
 
-# CSRF защита (в реальных проектах не использовать)
-@csrf_exempt
+@api_view(['DELETE'])
 def delete_user(request, user_id): # user_id в URL
     if request.method == 'DELETE': # Используем DELETE метод
         try:

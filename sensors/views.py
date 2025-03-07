@@ -3,12 +3,40 @@ from django.http import JsonResponse
 from .models import SensorData # Импорт модели SensorData из sensors.models
 from cars.models import Car     # Импорт Car, так как SensorData связан с Car
 from users.models import User    # Импорт User, так как SensorData связан с User
-from django.views.decorators.csrf import csrf_exempt
+from sensors.models import SensorData as Sensor    
 import json
 import datetime
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import api_view
+from rest_framework import serializers
 
-# Ищем данные по датчикам по ID
+
+
+@api_view(['GET'])
+def get_all_sensors(request):
+    """Получить все машины"""
+    all_sensors = Sensor.objects.all()
+    sensors_list = []
+    for sensor in all_sensors:
+        sensors_list.append({
+            'id': sensor.id,
+            'timestamp': sensor.timestamp,
+            'engine_rpm': sensor.engine_rpm,
+            'intake_air_temperature': sensor.intake_air_temperature,
+            'mass_air_flow_sensor': sensor.mass_air_flow_sensor,
+            'injection_duration': sensor.injection_duration,
+            'throttle_position': sensor.throttle_position,
+            'vehicle_speed': sensor.vehicle_speed,
+            'manifold_absolute_pressure': sensor.manifold_absolute_pressure,
+            'user_id': sensor.user_id,
+            'car_id': sensor.car_id
+            })
+    return JsonResponse({'sensors': sensors_list})
+
+@api_view(['GET'])
 def get_sensor_data(request, sensor_data_id):
+    """Получить данные по датчикам по ID"""
     try:
         sensor_data = SensorData.objects.get(id=sensor_data_id)
         sensor_data_dict = { # Преобразуем объект SensorData в словарь для JSON
@@ -28,8 +56,9 @@ def get_sensor_data(request, sensor_data_id):
     except SensorData.DoesNotExist:
         return JsonResponse({'error': 'SensorData not found'}, status=404)
 
-# Ищем данные по датчикам по VIN-номеру автомобиля
+@api_view(['GET'])
 def get_sensor_data_for_car(request, car_vin):
+    """Получить данные по датчикам для конкретной машины по VIN"""
     try:
         car = Car.objects.get(vin_number=car_vin)
         sensor_data_list = car.sensor_data.all() # Получаем все SensorData, связанные с car через relation
@@ -44,10 +73,27 @@ def get_sensor_data_for_car(request, car_vin):
         return JsonResponse({'sensor_data': sensor_data_records})
     except Car.DoesNotExist:
         return JsonResponse({'error': 'Car not found'}, status=404)
-    
-#
-@csrf_exempt
+
+# Сериализатор для описания тела запроса
+class SensorSerializer(serializers.Serializer):
+    car_vin = serializers.CharField()
+    user_id = serializers.IntegerField()
+    engine_rpm = serializers.IntegerField()
+    intake_air_temperature = serializers.FloatField()
+    mass_air_flow_sensor = serializers.FloatField()
+    injection_duration = serializers.FloatField()
+    throttle_position = serializers.FloatField()
+    vehicle_speed = serializers.FloatField()
+    manifold_absolute_pressure = serializers.FloatField()
+
+@swagger_auto_schema(
+    method='POST',
+    request_body=SensorSerializer,  # Указываем сериализатор для тела запроса
+    responses={200: 'Sensor added successfully'}
+)    
+@api_view(['POST'])
 def add_sensor_data_record(request):
+    """Добавить запись данных по датчикам"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -92,8 +138,12 @@ def add_sensor_data_record(request):
     else:
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
     
-#
-@csrf_exempt
+@swagger_auto_schema(
+    method='PUT',
+    request_body=SensorSerializer,  # Указываем сериализатор для тела запроса
+    responses={200: 'Sensor updated successfully'}
+)    
+@api_view(['PUT'])
 def update_sensor_data_record(request, sensor_data_id): # sensor_data_id передается в URL
     if request.method == 'PUT': # Используем PUT для обновления
         try:
@@ -147,8 +197,7 @@ def update_sensor_data_record(request, sensor_data_id): # sensor_data_id пер�
         else:
             return JsonResponse({'error': 'Only PUT method allowed'}, status=405)
 
-#
-@csrf_exempt
+@api_view(['DELETE'])
 def delete_sensor_data_record(request, sensor_data_id): # sensor_data_id в URL
     if request.method == 'DELETE': # Используем DELETE метод
         try:
