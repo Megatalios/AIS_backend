@@ -68,7 +68,14 @@ def get_sensor_data_for_car(request, car_vin):
                 'id': data.id,
                 'timestamp': data.timestamp.isoformat(),
                 'engine_rpm': data.engine_rpm,
-                # ... (остальные поля SensorData) ...
+                'intake_air_temperature': data.intake_air_temperature,
+                'mass_air_flow_sensor': data.mass_air_flow_sensor,
+                'injection_duration': data.injection_duration,
+                'throttle_position': data.throttle_position,
+                'vehicle_speed': data.vehicle_speed,
+                'manifold_absolute_pressure': data.manifold_absolute_pressure,
+                'user_id': data.user.id if data.user else None,
+                'car_id': data.car.id if data.car else None,
             })
         return JsonResponse({'sensor_data': sensor_data_records})
     except Car.DoesNotExist:
