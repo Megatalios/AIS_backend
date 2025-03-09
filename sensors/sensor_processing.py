@@ -34,7 +34,7 @@ def estimate_mass_air_flow(engine_rpm, intake_air_temperature_c):
     temperature_kelvin = intake_air_temperature_c + 273.15 # Перевод в Кельвины
     estimated_maf = base_maf * (engine_rpm / 1000) * (293.15 / temperature_kelvin) # 293.15K = 20°C - опорная температура
 
-    return estimated_maf, None
+    return estimated_maf
 
 
 def estimate_injection_duration(mass_air_flow_gs, engine_rpm):
@@ -61,4 +61,4 @@ def estimate_injection_duration(mass_air_flow_gs, engine_rpm):
     base_injection_duration = 0.08 # Базовая длительность впрыска (требуется калибровка)
     estimated_duration_ms = base_injection_duration * (mass_air_flow_gs / (engine_rpm / 1000)) # Приведение RPM к тысячам
 
-    return estimated_duration_ms, None
+    return estimated_duration_ms

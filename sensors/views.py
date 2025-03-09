@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
 from rest_framework import serializers
+from sensors import sensor_processing
 
 
 
@@ -56,6 +57,29 @@ def get_sensor_data(request, sensor_data_id):
     except SensorData.DoesNotExist:
         return JsonResponse({'error': 'SensorData not found'}, status=404)
 
+
+@api_view(['GET'])
+def get_result_processing(request, sensor_data_id):
+    """Получить результат вычислений по датчикам"""
+    try:
+        sensor_data = SensorData.objects.get(id=sensor_data_id)
+        estimate_mass_air_flow = sensor_processing.estimate_mass_air_flow(sensor_data.engine_rpm, sensor_data.intake_air_temperature)
+        estimate_injection_duration = sensor_processing.estimate_injection_duration(sensor_data.mass_air_flow_sensor, sensor_data.engine_rpm)
+        
+        sensor_calculate = { 
+            "sensor_data_id": sensor_data.id,   
+            "estimate_mass_air_flow": estimate_mass_air_flow,
+            "estimate_injection_duration": estimate_injection_duration,
+            "user_id": sensor_data.user_id,
+            "car_id": sensor_data.car_id
+        }
+
+        return JsonResponse(sensor_calculate)
+    except SensorData.DoesNotExist:
+            return JsonResponse({'error': 'SensorData not found'}, status=404)
+
+
+
 @api_view(['GET'])
 def get_sensor_data_for_car(request, car_vin):
     """Получить данные по датчикам для конкретной машины по VIN"""
@@ -80,6 +104,7 @@ def get_sensor_data_for_car(request, car_vin):
         return JsonResponse({'sensor_data': sensor_data_records})
     except Car.DoesNotExist:
         return JsonResponse({'error': 'Car not found'}, status=404)
+
 
 # Сериализатор для описания тела запроса
 class SensorSerializer(serializers.Serializer):
@@ -215,3 +240,5 @@ def delete_sensor_data_record(request, sensor_data_id): # sensor_data_id в URL
             return JsonResponse({'error': 'SensorData record not found'}, status=404)
     else:
         return JsonResponse({'error': 'Only DELETE method allowed'}, status=405)
+    
+

@@ -31,5 +31,6 @@ urlpatterns = [
     path('<str:car_vin>/', views.get_sensor_data_for_car, name='get_sensor_data_for_car'),
     path('update/<int:sensor_data_id>/', views.update_sensor_data_record, name='update_sensor_data_record'),
     path('delete/<int:sensor_data_id>/', views.delete_sensor_data_record, name='delete_sensor_data_record'),
+    path('calculate/<int:sensor_data_id>/', views.get_result_processing, name='get_result_processing'),
     # ... (возможно, другие URL-пути) ...
 ]
