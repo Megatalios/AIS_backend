@@ -61,10 +61,25 @@ def get_cars_by_brand(request, brand_query):
 
 # Сериализатор для описания тела запроса
 class CarSerializer(serializers.Serializer):
-    vin_number = serializers.CharField()
-    color = serializers.CharField()
-    brand = serializers.CharField()
+    # vin_number = serializers.CharField()
+    # color = serializers.CharField()
+    # brand = serializers.CharField()
+
+    vin_number = serializers.RegexField(
+        regex=r'^[A-HJ-NPR-Z0-9]{17}$',
+        error_messages={"invalid": "VIN-номер должен состоять из 17 символов (латинские буквы и цифры), без I, O, Q."}
+    )
+    color = serializers.RegexField(
+        regex=r'^[A-Za-z\s-]+$',
+        error_messages={"invalid": "Название цвета должно содержать только буквы."}
+    )
+    brand = serializers.CharField(min_length=2, max_length=50)
+
     owner_id = serializers.IntegerField()
+
+    class Meta:
+        model = Car
+        fields = ['id', 'vin_number', 'brand', 'color', 'owner_id']
 
 @swagger_auto_schema(
     method='POST',
