@@ -74,7 +74,8 @@ def add_sensor_data_record(request):
                 return JsonResponse({'error': 'User not found'}, status=400)
 
             sensor_data = SensorData(
-                car=car, user=user,
+                car=car, 
+                user=user,
                 timestamp=datetime.datetime.now(), # Timestamp можно задать явно или Django установит автоматически
                 engine_rpm=engine_rpm,
                 intake_air_temperature=intake_air_temperature,
