@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техническое состояние автомобиля</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="back_img">
+    </div>
+
+    <div class="image-container">
+        <img class="car2_new-size" src="img/bmwm5f90.png" alt="bmwm5f90" id="bg">
+        <div class="form-container-base">
+            
+            <div class="form-container" id="form">
+                <h3>Ввод параметров</h3>
+                <form>
+                    <div class="form-group">
+                        <label for="engine_rpm">engine_rpm (обороты двигателя):</label>
+                        <input type="text" id="engine_rpm" name="engine_rpm">
+                    </div>
+                    <div class="form-group">
+                        <label for="intake_air_temperature">intake_air_temperature (температура впускного воздуха):</label>
+                        <input type="text" id="intake_air_temperature" name="intake_air_temperature">
+                    </div>
+                    <div class="form-group">
+                        <label for="mass_air_flow_sensor">mass_air_flow_sensor (датчик массового расхода воздуха):</label>
+                        <input type="text" id="mass_air_flow_sensor" name="mass_air_flow_sensor">
+                    </div>
+                    <div class="form-group">
+                        <label for="injection_duration">injection_duration (длительность впрыска):</label>
+                        <input type="text" id="injection_duration" name="injection_duration">
+                    </div>
+                    <div class="form-group">
+                        <label for="throttle_position">throttle_position (положение дроссельной заслонки):</label>
+                        <input type="text" id="throttle_position" name="throttle_position">
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle_speed">vehicle_speed (скорость автомобиля):</label>
+                        <input type="text" id="vehicle_speed" name="vehicle_speed">
+                    </div>
+                    <div class="form-group">
+                        <label for="manifold_absolute_pressure">manifold_absolute_pressure (абсолютное давление в коллекторе):</label>
+                        <input type="text" id="manifold_absolute_pressure" name="manifold_absolute_pressure">
+                    </div>
+                    <div class="form-group">
+                        <button class="button-calculate" type="submit">Рассчитать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/index.js" type="text/babel"></script>
+</body>
+</html>
