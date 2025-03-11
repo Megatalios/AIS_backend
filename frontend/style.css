@@ -1,0 +1,113 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden; /* Отключаем горизонтальный скролл */
+    overflow-y: auto;   /* Включаем вертикальный скролл */
+}
+
+.car1 {
+    max-width: 100%;    /* Ограничиваем ширину изображения */
+    max-height: 100%;   /* Ограничиваем высоту изображения */
+    width: auto;        /* Сохраняем пропорции */
+    height: auto;       /* Сохраняем пропорции */
+    display: block;
+    margin: 0 auto;     /* Центрируем изображение */
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex
+;
+    height: 100vh;
+    flex-direction: column;
+    /* align-items: center; */
+}
+
+.form-container h3 {
+    text-align: center;
+    margin: 0;
+    margin-bottom: 25px;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 1px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+    border: 1px solid #00cdff;
+    border-radius: 4px;
+}
+
+.form-group input:focus {
+    border-color: #66afe9;
+    outline: none;
+    box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
+}
+
+
+.image-container {
+    position: relative; /* Родительский контейнер для позиционирования */
+    width: 100%; /* Ширина контейнера */
+    height: auto; /* Высота подстраивается под картинку */
+}
+
+.image-container img {
+    width: 100%; /* Картинка занимает всю ширину контейнера */
+    height: auto; /* Сохраняет пропорции */
+    display: block; /* Убирает лишние отступы */
+}
+
+.form-container {
+    position: absolute; /* Позиционирование поверх картинки */
+    top: 50px; /* Отступ сверху */
+    left: 20px; /* Отступ слева */
+    background-color: rgba(255, 255, 255, 0.99); /* Полупрозрачный белый фон */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 400px; /* Ширина формы */
+    z-index: 10; /* Убедитесь, что форма поверх картинки */
+    font-size: 16px;
+    /* scale: 0.75; */
+    /* zoom: 0.75; */
+}
+
+
+body {
+    background-color: black;
+}
+
+.button-calculate {   
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 20px;
+    display: block; /* Делаем кнопку блочным элементом */
+    margin: 0 auto; /* Центрирование по горизонтали */
+    width: 200px;
+    height: 50px;    
+}
+
+.button-calculate:hover {
+    background-color: #00cdff;
+    cursor: pointer;   
+ 
+}
+
