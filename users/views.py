@@ -7,6 +7,10 @@ from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
 from rest_framework import serializers
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, logout
+from django.contrib.auth.views import LoginView
+from .forms import RegisterForm
 
 
 
@@ -50,6 +54,31 @@ def get_all_users(request):
 class UserSerializer(serializers.Serializer):
     name = serializers.CharField()
     email = serializers.EmailField()
+
+@swagger_auto_schema(
+    method='POST',
+    request_body=UserSerializer,  # Указываем сериализатор для тела запроса
+    responses={200: 'User registered successfully'}
+)
+@api_view(['POST'])
+def register_view(request):
+    """Регистрация пользователя"""
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Автоматический вход после регистрации
+            return redirect('/')  # Укажите вашу главную страницу
+    else:
+        form = RegisterForm()
+    return render(request, 'users/register.html', {'form': form})
+
+class CustomLoginView(LoginView):
+    template_name = 'users/login.html'
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')
 
 
 @swagger_auto_schema(

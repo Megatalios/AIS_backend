@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техническое состояние автомобиля</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <div class="back_img">
+    </div>
+
+    <div class="image-container">
+        <img class="car2_new-size" src="{% static 'img/bmwm5f90.png' %} " alt="bmwm5f90" id="bg">
+        <div class="form-container-base">  
+            <div class="form-container first-form" id="form">
+                <h3>Ввод параметров</h3>
+
+                <form id="sensorForm" type="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="car_vin">VIN-номер:</label>
+                        <input type="text" id="car_vin" name="car_vin" value="1YGCM82633A153455">
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="engine_rpm">engine_rpm (обороты двигателя):</label>
+                        <input type="text" id="engine_rpm" name="engine_rpm" value="2500">
+                    </div>
+                    <div class="form-group">
+                        <label for="intake_air_temperature">intake_air_temperature (температура впускного воздуха):</label>
+                        <input type="text" id="intake_air_temperature" name="intake_air_temperature" value="35">
+                    </div>
+                    <div class="form-group">
+                        <label for="mass_air_flow_sensor">mass_air_flow_sensor (датчик массового расхода воздуха):</label>
+                        <input type="text" id="mass_air_flow_sensor" name="mass_air_flow_sensor" value="12.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="injection_duration">injection_duration (длительность впрыска):</label>
+                        <input type="text" id="injection_duration" name="injection_duration" value="4.2">
+                    </div>
+                    <div class="form-group">
+                        <label for="throttle_position">throttle_position (положение дроссельной заслонки):</label>
+                        <input type="text" id="throttle_position" name="throttle_position" value="22.5">
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle_speed">vehicle_speed (скорость автомобиля):</label>
+                        <input type="text" id="vehicle_speed" name="vehicle_speed" value="60">
+                    </div>
+                    <div class="form-group">
+                        <label for="manifold_absolute_pressure">manifold_absolute_pressure (абсолютное давление в коллекторе):</label>
+                        <input type="text" id="manifold_absolute_pressure" name="manifold_absolute_pressure" value="101.3">
+                    </div>
+                    <div class="form-group">
+                        <button class="button-calculate" id="calculateButton" type="button">Рассчитать</button>
+                    </div>
+                </form>
+                <p id="responseMessage"></p>      
+            </div>
+        </div>
+
+        <div class="form-container secondary-form" id="form2">
+            <h3>Добавить авто</h3>
+            <form id="additionalForm" type="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="car_brand_2">Марка авто:</label>
+                    <input type="text" id="car_brand_2" name="car_brand_2" value="Tesla">
+                </div>
+                <div class="form-group">
+                    <label for="car_color_2">Цвет авто:</label>
+                    <input type="text" id="car_color_2" name="car_color_2" value="Gray">
+                </div>
+                <div class="form-group">
+                    <label for="car_vin_2">VIN-номер:</label>
+                    <input type="text" id="car_vin_2" name="car_vin_2" value="1YGCM82633A153455">
+                </div>
+                <div class="form-group">
+                    <button class="button-calculate" id="addCarButton" type="button">Добавить</button>
+                </div>
+            </form>
+            <p id="responseMessageCar"></p>      
+
+        </div>
+    </div>
+    
+    <script src="{% static 'js/script.js' %}" defer></script>
+</body>
+</html>

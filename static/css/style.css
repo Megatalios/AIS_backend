@@ -55,7 +55,9 @@ body {
 }
 
 .form-group input:focus {
-    border-color: #66afe9;
+    /* border-color: #66afe9; */
+    border-color: #22ff00;
+
     outline: none;
     box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
 }
@@ -111,3 +113,6 @@ body {
  
 }
 
+.first-form {
+    left: 500px !important; 
+}

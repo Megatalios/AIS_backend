@@ -8,10 +8,59 @@ import json
 import datetime
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import serializers
 from sensors import sensor_processing
+from django.contrib.auth.decorators import login_required
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from .models import SensorData
+from cars.models import Car
+from users.models import User
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.views.decorators.csrf import csrf_exempt
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def save_sensor_data(request):
+    """Сохранение данных с датчиков в базу данных"""
+    try:
+        data = request.data
+
+        # Проверяем обязательные поля
+        required_fields = ["car_vin", "car_brand", "car_color", "engine_rpm"]
+        for field in required_fields:
+            if field not in data:
+                return Response({"error": f"Поле {field} отсутствует"}, status=400)
+
+        # Создаем или получаем авто по VIN
+        car, created = Car.objects.get_or_create(
+            vin_number=data.get('car_vin'),
+            defaults={
+                'brand': data.get('car_brand'),
+                'color': data.get('car_color'),
+                'owner_id': request.user.id if request.user.is_authenticated else None
+            }
+        )
+
+        # Создаем запись о сенсорах
+        sensor_data = SensorData.objects.create(
+            user_id=request.user.id if request.user.is_authenticated else None,
+            car_vin=data.get('car_vin'),
+            engine_rpm=float(data.get('engine_rpm')),
+            intake_air_temperature=float(data.get('intake_air_temperature', 0)),
+            mass_air_flow_sensor=float(data.get('mass_air_flow_sensor', 0)),
+            injection_duration=float(data.get('injection_duration', 0)),
+            throttle_position=float(data.get('throttle_position', 0)),
+            vehicle_speed=float(data.get('vehicle_speed', 0)),
+            manifold_absolute_pressure=float(data.get('manifold_absolute_pressure', 0))
+        )
+
+        return Response({"message": "Данные успешно сохранены!"}, status=201)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
 
 
 @api_view(['GET'])
@@ -122,15 +171,18 @@ class SensorSerializer(serializers.Serializer):
     method='POST',
     request_body=SensorSerializer,  # Указываем сериализатор для тела запроса
     responses={200: 'Sensor added successfully'}
-)    
+)
+# @csrf_exempt
 @api_view(['POST'])
 def add_sensor_data_record(request):
     """Добавить запись данных по датчикам"""
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            # data = json.loads(request.body)
+            data = request.data  # ✅ Django сам распарсит JSON
+
             car_vin = data.get('car_vin')
-            user_id = data.get('user_id')
+            # user_id = data.get('user_id')
             engine_rpm = data.get('engine_rpm')
             intake_air_temperature = data.get('intake_air_temperature')
             mass_air_flow_sensor = data.get('mass_air_flow_sensor')
@@ -139,20 +191,28 @@ def add_sensor_data_record(request):
             vehicle_speed = data.get('vehicle_speed')
             manifold_absolute_pressure = data.get('manifold_absolute_pressure')
 
-            if not car_vin or not user_id or engine_rpm is None: # engine_rpm - обязательное поле
+            if not car_vin or engine_rpm is None: # engine_rpm - обязательное поле
                 return JsonResponse({'error': 'Car VIN, User ID and engine_rpm are required'}, status=400)
 
             try:
                 car = Car.objects.get(vin_number=car_vin)
             except Car.DoesNotExist:
                 return JsonResponse({'error': 'Car not found'}, status=400)
+            # try:
+            #     user = User.objects.get(id=user_id)
+            # except User.DoesNotExist:
+            #     return JsonResponse({'error': 'User not found'}, status=400)
+            if request.user.is_anonymous:
+                return JsonResponse({'error': 'Authentication required'}, status=401)
+    
             try:
-                user = User.objects.get(id=user_id)
+                user = User.objects.get(id=request.user.id)  # ✅ Исправлено (теперь это User, а не SimpleLazyObject)
             except User.DoesNotExist:
                 return JsonResponse({'error': 'User not found'}, status=400)
 
             sensor_data = SensorData(
-                car=car, user=user,
+                car=car, 
+                user=user,
                 timestamp=datetime.datetime.now(), # Timestamp можно задать явно или Django установит автоматически
                 engine_rpm=engine_rpm,
                 intake_air_temperature=intake_air_temperature,

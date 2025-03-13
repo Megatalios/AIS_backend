@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from cars.views import home_view
 
 
 
 urlpatterns = [
+    path('', home_view, name='home'),
     path('admin/', admin.site.urls),
     path('cars/', include('cars.urls')),       # <-- Включаем uxrls.py из приложения cars
     path('sensors/', include('sensors.urls')),    # <-- Включаем urls.py из приложения sensors

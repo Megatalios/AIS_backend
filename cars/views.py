@@ -8,7 +8,10 @@ from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
 from rest_framework import serializers
+from django.shortcuts import render
 
+def home_view(request):
+    return render(request, 'index.html')  # Показываем HTML-файл
 
 
 
@@ -92,11 +95,23 @@ def add_car(request):
     """Добавить новую машину"""
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            # data = json.loads(request.body)
+            data = request.data 
+
             vin_number = data.get('vin_number')
             brand = data.get('brand')
             color = data.get('color')
-            owner_id = data.get('owner_id') # ID владельца
+            # owner_id = data.get('owner_id') # ID владельца
+            owner_id = request.user.id # ID владельца
+            
+            if request.user.is_anonymous:
+                return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+            try:
+                user = User.objects.get(id=request.user.id)  
+            except User.DoesNotExist:
+                return JsonResponse({'error': 'User not found'}, status=400)
+            
 
             if not vin_number or not brand or not color:
                 return JsonResponse({'error': 'VIN, brand and color are required'}, status=400)
