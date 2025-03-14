@@ -6,121 +6,86 @@ function getCSRFToken() {
 }
 
 
+function getUserId() {
+    return fetch('/sensors/get_user_info/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            return data.user_id;
+        });
+}
 
-//Первый запрос на сохранение датчиков в бд
+// Первый запрос на сохранение датчиков в бд
+// Сначала пробуем обновить (PUT), если не найдено, то создаем (POST)
 function sendSensorData() {
-    const data = {
-        car_vin: document.getElementById('car_vin').value,
-        // user_id: document.getElementById('user_id').value,
-        // user_id: 1,
-        engine_rpm: document.getElementById('engine_rpm').value,
-        intake_air_temperature: document.getElementById('intake_air_temperature').value,
-        mass_air_flow_sensor: document.getElementById('mass_air_flow_sensor').value,
-        injection_duration: document.getElementById('injection_duration').value,
-        throttle_position: document.getElementById('throttle_position').value,
-        vehicle_speed: document.getElementById('vehicle_speed').value,
-        manifold_absolute_pressure: document.getElementById('manifold_absolute_pressure').value
-    };
+    const vinNumber = document.getElementById('car_vin').value;
+    getUserId()
+    .then(userId => {
+        if (!userId) throw new Error("User ID is missing");
+        
+        return fetch(`/cars/get_car_id/?vin_number=${vinNumber}`)
+            .then(response => response.json())
+            .then(carData => {
+                if (!carData.car_id) throw new Error("Car ID not found for VIN " + vinNumber);
+                return { userId, carId: carData.car_id };
+            });
+    })
+    .then(({ userId, carId }) => {
+        return fetch(`/sensors/check/?car_id=${carId}&user_id=${userId}`)
+            .then(response => response.json())
+            .then(sensorCheck => {
+                return { userId, carId, sensorCheck };
+            });
+    })
+    .then(({ userId, carId, sensorCheck }) => {
+        const engineRpm = document.getElementById('engine_rpm').value;
+        if (!engineRpm) throw new Error("Engine RPM is missing");
 
-    fetch('/sensors/add/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            "X-CSRFToken": getCSRFToken()
-        },
-        body: JSON.stringify(data)
+        const sensorData = {
+            car_vin: vinNumber,
+            user_id: userId,
+            engine_rpm: engineRpm,
+            intake_air_temperature: document.getElementById('intake_air_temperature').value,
+            mass_air_flow_sensor: document.getElementById('mass_air_flow_sensor').value,
+            injection_duration: document.getElementById('injection_duration').value,
+            throttle_position: document.getElementById('throttle_position').value,
+            vehicle_speed: document.getElementById('vehicle_speed').value,
+            manifold_absolute_pressure: document.getElementById('manifold_absolute_pressure').value
+        };
+
+
+        const url = sensorCheck.exists
+            ? `/sensors/update/${sensorCheck.sensor_data_id}/`
+            : `/sensors/add/`;
+        const method = sensorCheck.exists ? 'PUT' : 'POST';
+
+        return fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: JSON.stringify(sensorData)
+        });
     })
     .then(response => response.json())
     .then(data => {
         if (data.error) {
             document.getElementById('responseMessage').innerText = "Ошибка: " + data.error;
         } else {
-            document.getElementById('responseMessage').innerText = "Датчики добавлены успешно! ID записи: " + data.sensor_data_id;
+            document.getElementById('responseMessage').innerText = `Данные ${data.sensor_data_id ? "обновлены" : "добавлены"} успешно! ID записи: ${data.sensor_data_id}`;
             fetchSensorData(data.sensor_data_id);
-
         }
     })
     .catch(error => {
         console.error('Ошибка:', error);
-        document.getElementById('responseMessage').innerText = "Ошибка при отправке данных.";
+        document.getElementById('responseMessage').innerText = "Ошибка: " + error.message;
     });
 }
-
-// Попытка сначала сделать PUT , он работает, но в случае если нет авто, то выдает Not Found: /cars/get_car_id/
-// POST не работает
-// function sendSensorData() {
-//     const vinNumber = document.getElementById('car_vin').value;
-
-//     // 1. Запрашиваем car_id по vin_number
-//     fetch(`/cars/get_car_id/?vin_number=${vinNumber}`)
-//     .then(response => response.json())
-//     .then(carData => {
-//         if (!carData.car_id) {
-//             document.getElementById('responseMessage').innerText = "Ошибка: автомобиль не найден.";
-//             return;
-//         }
-
-//         const car_id = carData.car_id;
-//         const user_id = 1; // Здесь можно поставить реального пользователя, если он доступен в системе
-
-//         // 2. Проверяем, есть ли уже запись в sensors_sensor
-//         return fetch(`/sensors/check/?car_id=${car_id}&user_id=${user_id}`);
-//     })
-//     .then(response => response.json())
-//     .then(sensorRecord => {
-//         const sensorData = {
-//             car_vin: vinNumber,
-//             engine_rpm: document.getElementById('engine_rpm').value,
-//             intake_air_temperature: document.getElementById('intake_air_temperature').value,
-//             mass_air_flow_sensor: document.getElementById('mass_air_flow_sensor').value,
-//             injection_duration: document.getElementById('injection_duration').value,
-//             throttle_position: document.getElementById('throttle_position').value,
-//             vehicle_speed: document.getElementById('vehicle_speed').value,
-//             manifold_absolute_pressure: document.getElementById('manifold_absolute_pressure').value
-//         };
-
-//         if (sensorRecord && sensorRecord.sensor_data_id) {
-//             // 3. Если запись есть → PUT-запрос
-//             return fetch(`/sensors/update/${sensorRecord.sensor_data_id}/`, {
-//                 method: 'PUT',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     "X-CSRFToken": getCSRFToken()
-//                 },
-//                 body: JSON.stringify(sensorData)
-//             })
-//             .then(response => response.json())
-//             .then(updatedData => {
-//                 document.getElementById('responseMessage').innerText = "Данные обновлены успешно! ID записи: " + updatedData.sensor_data_id;
-//                 fetchSensorData(updatedData.sensor_data_id);
-//             });
-//         } else {
-//             // 4. Если записи нет → POST-запрос
-//             return fetch('/sensors/add/', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                     "X-CSRFToken": getCSRFToken()
-//                 },
-//                 body: JSON.stringify(sensorData)
-//             })
-//             .then(response => response.json())
-//             .then(newData => {
-//                 document.getElementById('responseMessage').innerText = "Датчики добавлены успешно! ID записи: " + newData.sensor_data_id;
-//                 fetchSensorData(newData.sensor_data_id);
-//             });
-//         }
-//     })
-//     .catch(error => {
-//         console.error('Ошибка:', error);
-//         document.getElementById('responseMessage').innerText = "Ошибка при отправке данных.";
-//     });
-// }
 
 
 
 // Второй запрос на создание машины
-
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("addCarButton").addEventListener("click", sendCar);
 });
@@ -155,7 +120,6 @@ function sendCar() {
 }
 
 function fetchSensorData(car_id) {
-    console.log("fetchSensorData вызвана с car_id:", car_id); 
     fetch(`/sensors/calculate/${car_id}`)
     .then(response => response.json())
     .then(sensorData => {
@@ -194,67 +158,8 @@ function saveSensorCalculation(sensorData) {
         if (data.error) {
             console.error("Ошибка:", data.error);
         } else {
-            console.log(`Расчёты сохранены! ID: ${data.calculated_id}, Новая запись: ${data.created}`);
+            // console.log(`Расчёты сохранены! ID: ${data.calculated_id}, Новая запись: ${data.created}`);
         }
     })
     .catch(error => console.error("Ошибка при сохранении данных:", error));
 }
-
-
-
-
-
-
-
-// document.addEventListener("DOMContentLoaded", function () {
-//     document.querySelector("form").addEventListener("submit", function (event) {
-//         event.preventDefault(); // Остановить стандартную отправку формы
-
-//         let formData = {
-//             car_brand: document.getElementById("car_brand").value,
-//             car_color: document.getElementById("car_color").value,
-//             car_vin: document.getElementById("car_vin").value,
-//             engine_rpm: parseFloat(document.getElementById("engine_rpm").value),
-//             intake_air_temperature: parseFloat(document.getElementById("intake_air_temperature").value),
-//             mass_air_flow_sensor: parseFloat(document.getElementById("mass_air_flow_sensor").value),
-//             injection_duration: parseFloat(document.getElementById("injection_duration").value),
-//             throttle_position: parseFloat(document.getElementById("throttle_position").value),
-//             vehicle_speed: parseFloat(document.getElementById("vehicle_speed").value),
-//             manifold_absolute_pressure: parseFloat(document.getElementById("manifold_absolute_pressure").value)
-//         };
-
-//         fetch("/sensors/save-sensor-data/", {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "X-CSRFToken": getCookie("csrftoken") // CSRF-токен для Django
-//             },
-//             body: JSON.stringify(formData)
-//         })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.message) {
-//                 alert("✅ " + data.message);
-//             } else {
-//                 alert("⚠ Ошибка: " + JSON.stringify(data));
-//             }
-//         })
-//         .catch(error => console.error("Ошибка:", error));
-//     });
-
-//     // Функция для получения CSRF-токена
-//     function getCookie(name) {
-//         let cookieValue = null;
-//         if (document.cookie && document.cookie !== "") {
-//             let cookies = document.cookie.split(";");
-//             for (let i = 0; i < cookies.length; i++) {
-//                 let cookie = cookies[i].trim();
-//                 if (cookie.startsWith(name + "=")) {
-//                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-//                     break;
-//                 }
-//             }
-//         }
-//         return cookieValue;
-//     }
-// });

@@ -19,6 +19,16 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.views.decorators.csrf import csrf_exempt
 
 
+
+
+@api_view(['GET'])
+def get_user_info(request):
+    """Возвращает ID текущего пользователя"""
+    if request.user.is_authenticated:
+        return JsonResponse({"user_id": request.user.id})
+    return JsonResponse({"error": "Unauthorized"}, status=401)
+
+
 @api_view(['GET'])
 def check_sensor_data(request):
     car_id = request.GET.get("car_id")
@@ -33,8 +43,6 @@ def check_sensor_data(request):
         return JsonResponse({"sensor_data_id": sensor_record.id})
     else:
         return JsonResponse({"sensor_data_id": None})
-
-
 
 
 
@@ -226,64 +234,69 @@ class SensorSerializer(serializers.Serializer):
     request_body=SensorSerializer,  # Указываем сериализатор для тела запроса
     responses={200: 'Sensor added successfully'}
 )
-# @csrf_exempt
+
 @api_view(['POST'])
 def add_sensor_data_record(request):
-    """Добавить запись данных по датчикам"""
-    if request.method == 'POST':
-        try:
-            # data = json.loads(request.body)
-            data = request.data 
-
-            car_vin = data.get('car_vin')
-            # user_id = data.get('user_id')
-            engine_rpm = data.get('engine_rpm')
-            intake_air_temperature = data.get('intake_air_temperature')
-            mass_air_flow_sensor = data.get('mass_air_flow_sensor')
-            injection_duration = data.get('injection_duration')
-            throttle_position = data.get('throttle_position')
-            vehicle_speed = data.get('vehicle_speed')
-            manifold_absolute_pressure = data.get('manifold_absolute_pressure')
-
-            if not car_vin or engine_rpm is None: # engine_rpm - обязательное поле
-                return JsonResponse({'error': 'Car VIN, User ID and engine_rpm are required'}, status=400)
-
-            try:
-                car = Car.objects.get(vin_number=car_vin)
-            except Car.DoesNotExist:
-                return JsonResponse({'error': 'Car not found'}, status=400)
-            # try:
-            #     user = User.objects.get(id=user_id)
-            # except User.DoesNotExist:
-            #     return JsonResponse({'error': 'User not found'}, status=400)
-            if request.user.is_anonymous:
-                return JsonResponse({'error': 'Authentication required'}, status=401)
-    
-            try:
-                user = User.objects.get(id=request.user.id)  # ✅ Исправлено (теперь это User, а не SimpleLazyObject)
-            except User.DoesNotExist:
-                return JsonResponse({'error': 'User not found'}, status=400)
-
-            sensor_data = SensorData(
-                car=car, 
-                user=user,
-                timestamp=datetime.datetime.now(), # Timestamp можно задать явно или Django установит автоматически
-                engine_rpm=engine_rpm,
-                intake_air_temperature=intake_air_temperature,
-                mass_air_flow_sensor=mass_air_flow_sensor,
-                injection_duration=injection_duration,
-                throttle_position=throttle_position,
-                vehicle_speed=vehicle_speed,
-                manifold_absolute_pressure=manifold_absolute_pressure
-            )
-            sensor_data.save()
-            return JsonResponse({'message': 'SensorData record created successfully', 'sensor_data_id': sensor_data.id}, status=201)
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    else:
+    """Добавить или обновить запись данных по датчикам"""
+    if request.method != 'POST':
         return JsonResponse({'error': 'Only POST method allowed'}, status=405)
-    
+
+    try:
+        data = request.data
+
+        car_vin = data.get('car_vin')
+        engine_rpm = data.get('engine_rpm')
+        intake_air_temperature = data.get('intake_air_temperature')
+        mass_air_flow_sensor = data.get('mass_air_flow_sensor')
+        injection_duration = data.get('injection_duration')
+        throttle_position = data.get('throttle_position')
+        vehicle_speed = data.get('vehicle_speed')
+        manifold_absolute_pressure = data.get('manifold_absolute_pressure')
+
+        if not car_vin or engine_rpm is None:
+            return JsonResponse({'error': 'Car VIN and engine_rpm are required'}, status=400)
+
+        # Проверяем авторизацию пользователя
+        if request.user.is_anonymous:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+
+        try:
+            car = Car.objects.get(vin_number=car_vin)
+        except Car.DoesNotExist:
+            return JsonResponse({'error': 'Car not found'}, status=404)
+
+        try:
+            user = User.objects.get(id=request.user.id)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        # 🔹 **Обновление существующей записи или создание новой**
+        sensor_data, created = SensorData.objects.update_or_create(
+            car=car,
+            user=user,
+            defaults={  # Поля, которые будут обновляться
+                'engine_rpm': engine_rpm,
+                'intake_air_temperature': intake_air_temperature,
+                'mass_air_flow_sensor': mass_air_flow_sensor,
+                'injection_duration': injection_duration,
+                'throttle_position': throttle_position,
+                'vehicle_speed': vehicle_speed,
+                'manifold_absolute_pressure': manifold_absolute_pressure,
+                'timestamp': datetime.datetime.now()  # Обновляем время последнего обновления данных
+            }
+        )
+
+        return JsonResponse({
+            'message': 'SensorData record updated successfully' if not created else 'SensorData record created successfully',
+            'sensor_data_id': sensor_data.id,
+            'updated': not created
+        }, status=200 if not created else 201)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+
+
 @swagger_auto_schema(
     method='PUT',
     request_body=SensorSerializer,  # Указываем сериализатор для тела запроса

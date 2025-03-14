@@ -142,7 +142,7 @@ body {
 
 .sensor-data-container {
     position: absolute;
-    top: 350px; /* Отступ сверху */
+    top: 380px; /* Отступ сверху */
     left: -450px; /* Смещение вправо от формы */
     background-color: rgba(255, 255, 255, 0.99);
     padding: 20px;
