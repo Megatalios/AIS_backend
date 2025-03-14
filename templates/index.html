@@ -34,31 +34,31 @@
 
                     <div class="form-group">
                         <label for="engine_rpm">engine_rpm (обороты двигателя):</label>
-                        <input type="text" id="engine_rpm" name="engine_rpm" value="2500">
+                        <input type="number" id="engine_rpm" name="engine_rpm" value="2500">
                     </div>
                     <div class="form-group">
                         <label for="intake_air_temperature">intake_air_temperature (температура впускного воздуха):</label>
-                        <input type="text" id="intake_air_temperature" name="intake_air_temperature" value="35">
+                        <input type="number" id="intake_air_temperature" name="intake_air_temperature" value="35">
                     </div>
                     <div class="form-group">
                         <label for="mass_air_flow_sensor">mass_air_flow_sensor (датчик массового расхода воздуха):</label>
-                        <input type="text" id="mass_air_flow_sensor" name="mass_air_flow_sensor" value="12.5">
+                        <input type="number" id="mass_air_flow_sensor" name="mass_air_flow_sensor" value="12.5">
                     </div>
                     <div class="form-group">
                         <label for="injection_duration">injection_duration (длительность впрыска):</label>
-                        <input type="text" id="injection_duration" name="injection_duration" value="4.2">
+                        <input type="number" id="injection_duration" name="injection_duration" value="4.2">
                     </div>
                     <div class="form-group">
                         <label for="throttle_position">throttle_position (положение дроссельной заслонки):</label>
-                        <input type="text" id="throttle_position" name="throttle_position" value="22.5">
+                        <input type="number" id="throttle_position" name="throttle_position" value="22.5">
                     </div>
                     <div class="form-group">
                         <label for="vehicle_speed">vehicle_speed (скорость автомобиля):</label>
-                        <input type="text" id="vehicle_speed" name="vehicle_speed" value="60">
+                        <input type="number" id="vehicle_speed" name="vehicle_speed" value="60">
                     </div>
                     <div class="form-group">
                         <label for="manifold_absolute_pressure">manifold_absolute_pressure (абсолютное давление в коллекторе):</label>
-                        <input type="text" id="manifold_absolute_pressure" name="manifold_absolute_pressure" value="101.3">
+                        <input type="number" id="manifold_absolute_pressure" name="manifold_absolute_pressure" value="101.3">
                     </div>
                     <div class="form-group">
                         <button class="button-calculate" id="calculateButton" type="button">Рассчитать</button>
@@ -66,7 +66,7 @@
                 </form>
                 <p id="responseMessage"></p>
                 <div class="sensor-data-container" id="sensorContainer">
-                    <h3>Данные датчиков</h3>
+                    <h3>Рассчитанные параметры</h3>
                     <p id="sensorResponse"></p>
                 </div>
                     
