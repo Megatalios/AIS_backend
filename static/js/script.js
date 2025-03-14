@@ -155,6 +155,7 @@ function sendCar() {
 }
 
 function fetchSensorData(car_id) {
+    console.log("fetchSensorData вызвана с car_id:", car_id); 
     fetch(`/sensors/calculate/${car_id}`)
     .then(response => response.json())
     .then(sensorData => {
@@ -169,6 +170,8 @@ function fetchSensorData(car_id) {
                 <strong>User ID:</strong> ${sensorData.user_id} <br>
                 <strong>Car ID:</strong> ${sensorData.car_id}
             `;
+            // После получения данных вызываем сохранение в БД
+            saveSensorCalculation(sensorData);
         }
     })
     .catch(error => {
@@ -177,6 +180,25 @@ function fetchSensorData(car_id) {
     });
 }
 
+
+function saveSensorCalculation(sensorData) {
+    fetch(`/sensors/calculate/save/${sensorData.sensor_data_id}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error("Ошибка:", data.error);
+        } else {
+            console.log(`Расчёты сохранены! ID: ${data.calculated_id}, Новая запись: ${data.created}`);
+        }
+    })
+    .catch(error => console.error("Ошибка при сохранении данных:", error));
+}
 
 
 

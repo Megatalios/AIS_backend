@@ -33,5 +33,7 @@ urlpatterns = [
     path('update/<int:sensor_data_id>/', views.update_sensor_data_record, name='update_sensor_data_record'),
     path('delete/<int:sensor_data_id>/', views.delete_sensor_data_record, name='delete_sensor_data_record'),
     path('calculate/<int:sensor_data_id>/', views.get_result_processing, name='get_result_processing'),
+    path('calculate/save/<int:sensor_data_id>/', views.save_calculated_sensor_data, name='save_calculated_sensor_data'),
+
     # ... (возможно, другие URL-пути) ...
 ]

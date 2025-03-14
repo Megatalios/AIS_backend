@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import SensorData # Импорт модели SensorData из sensors.models
+from .models import SensorData, SensorDataCalculated # Импорт модели SensorData из sensors.models
 from cars.models import Car     # Импорт Car, так как SensorData связан с Car
 from users.models import User    # Импорт User, так как SensorData связан с User
 import json
@@ -34,6 +34,45 @@ def check_sensor_data(request):
     else:
         return JsonResponse({"sensor_data_id": None})
 
+
+
+
+
+@api_view(['POST'])
+def save_calculated_sensor_data(request, sensor_data_id):
+    """Сохранение рассчитанных данных в таблицу SensorDataCalculated"""
+    try:
+        # Проверяем, существует ли уже такая запись
+        sensor_data = SensorData.objects.get(id=sensor_data_id)
+
+        # Вычисления (должны совпадать с GET-запросом)
+        estimate_mass_air_flow = sensor_processing.estimate_mass_air_flow(sensor_data.engine_rpm, sensor_data.intake_air_temperature)
+        estimate_injection_duration = sensor_processing.estimate_injection_duration(sensor_data.mass_air_flow_sensor, sensor_data.engine_rpm)
+
+        # Проверяем, существует ли уже запись для этой машины и пользователя
+        calculated_entry, created = SensorDataCalculated.objects.get_or_create(
+            user=sensor_data.user,
+            car=sensor_data.car,
+            defaults={
+                "estimated_mass_air_flow_sensor": estimate_mass_air_flow,
+                "estimate_injection_duration": estimate_injection_duration
+            }
+        )
+
+        if not created:
+            # Если запись уже есть, обновляем значения
+            calculated_entry.estimated_mass_air_flow_sensor = estimate_mass_air_flow
+            calculated_entry.estimate_injection_duration = estimate_injection_duration
+            calculated_entry.save()
+
+        return JsonResponse({
+            "message": "Данные успешно сохранены",
+            "calculated_id": calculated_entry.id,
+            "created": created  # true, если запись новая, false, если обновлена
+        })
+
+    except SensorData.DoesNotExist:
+        return JsonResponse({'error': 'SensorData not found'}, status=404)
 
 
 @api_view(['POST'])
