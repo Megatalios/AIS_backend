@@ -13,6 +13,7 @@
         {% if user.is_authenticated %}
             <span>Пользователь: {{ user.username }} (ID: {{ user.id }})</span>
             <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
+            <a href="{% url 'user_dashboard' %}" class="all-cars-button">Все данные об авто</a>
         {% else %}
             <a href="{% url 'login' %}" class="login-button">Войти</a>
         {% endif %}

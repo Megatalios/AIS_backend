@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Car  # Импорт модели Car из cars.models
-from users.models import User # Импорт User, так как Car связан с User
+from users.models import User
+from sensors.models import SensorData, SensorDataCalculated
 from django.views.decorators.csrf import csrf_exempt
 import json
 from rest_framework.decorators import api_view
@@ -10,6 +11,28 @@ from rest_framework.decorators import api_view
 from rest_framework import serializers
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+
+
+
+@login_required
+def user_dashboard(request):
+    # Получаем текущего авторизованного пользователя
+    user = request.user
+    
+    # Получаем данные по автомобилям, сенсорам и рассчитанным данным для текущего пользователя
+    cars = Car.objects.filter(owner_id=user.id)
+    sensors_data = SensorData.objects.filter(user_id=user.id)
+    sensors_data_calculated = SensorDataCalculated.objects.filter(user_id=user.id)
+    
+    # Передаем данные в шаблон
+    return render(request, 'user_dashboard.html', {
+        'cars': cars,
+        'sensors_data': sensors_data,
+        'sensors_data_calculated': sensors_data_calculated,
+    })
+
+
+
 
 @login_required(login_url='/users/login/') 
 def home_view(request):

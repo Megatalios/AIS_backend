@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд пользователя</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+
+    <div class="user-info">
+        {% if user.is_authenticated %}
+            <span>Пользователь: {{ user.username }} (ID: {{ user.id }})</span>
+            <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
+            <a href="{% url 'home' %}" class="all-cars-button">На главную</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="login-button">Войти</a>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <h1>Данные об авто и датчиках</h1>
+
+        <div class="table-container">
+            <h2>Мои автомобили</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Марка</th>
+                        <th>Цвет</th>
+                        <th>VIN-номер</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for car in cars %}
+                        <tr>
+                            <td>{{ car.id }}</td>
+                            <td>{{ car.brand }}</td>
+                            <td>{{ car.color }}</td>
+                            <td>{{ car.vin_number }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3">Нет автомобилей</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <h2>Данные с датчиков</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Car_id</th>
+                        <th>User_id</th>
+                        <th>Дата и время</th>
+                        <th>Обороты двигателя</th>
+                        <th>Температура впускного воздуха</th>
+                        <th>Массовый расход воздуха</th>
+
+                        <th>Длительность впрыска</th>
+                        <th>Положение дроссельной заслонки</th>
+                        <th>Скорость автомобиля</th>
+                        <th>Абсолютное давление в коллекторе</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in sensors_data %}
+                        <tr>
+                            <td>{{ data.id }}</td>
+                            <td>{{ data.car_id }}</td>
+                            <td>{{ data.user_id }}</td>
+                            <td>{{ data.timestamp }}</td>
+                            <td>{{ data.engine_rpm }}</td>
+                            <td>{{ data.intake_air_temperature }}</td>
+                            <td>{{ data.mass_air_flow_sensor }}</td>
+
+                            <td>{{ data.injection_duration }}</td>
+                            <td>{{ data.throttle_position }}</td>
+                            <td>{{ data.vehicle_speed }}</td>
+                            <td>{{ data.manifold_absolute_pressure }}</td>
+
+
+                            
+                            
+                            
+                            
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">Нет данных с сенсоров</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <h2>Рассчитанные данные с датчиков</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Оценка расхода воздуха(MAF)</th>
+                        <th>Оценка длительности впрыска(ID)</th>
+                        <th>Car_id</th>
+                        <th>User_id</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in sensors_data_calculated %}
+                        <tr>
+                            <td>{{ data.id }}</td>
+                            <td>{{ data.estimated_mass_air_flow_sensor }}</td>
+                            <td>{{ data.estimate_injection_duration }}</td>
+                            <td>{{ data.car_id }}</td>
+                            <td>{{ data.user_id }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">Нет рассчитанных данных с датчиков</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
