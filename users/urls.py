@@ -25,6 +25,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     
     path('register/', register_view, name='register'),
+    # path('register/', auth_views.LogoutView.as_view(template_name='users/register.html'), name='register'),
+
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', logout_view, name='logout'),
 

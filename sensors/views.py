@@ -3,7 +3,6 @@ from django.http import JsonResponse
 from .models import SensorData # Импорт модели SensorData из sensors.models
 from cars.models import Car     # Импорт Car, так как SensorData связан с Car
 from users.models import User    # Импорт User, так как SensorData связан с User
-from sensors.models import SensorData as Sensor    
 import json
 import datetime
 from rest_framework.decorators import api_view
@@ -14,11 +13,27 @@ from sensors import sensor_processing
 from django.contrib.auth.decorators import login_required
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import SensorData
 from cars.models import Car
 from users.models import User
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.views.decorators.csrf import csrf_exempt
+
+
+@api_view(['GET'])
+def check_sensor_data(request):
+    car_id = request.GET.get("car_id")
+    user_id = request.GET.get("user_id")
+
+    if not car_id or not user_id:
+        return JsonResponse({"error": "car_id и user_id обязательны"}, status=400)
+
+    sensor_record = SensorData.objects.filter(car_id=car_id, user_id=user_id).first()
+
+    if sensor_record:
+        return JsonResponse({"sensor_data_id": sensor_record.id})
+    else:
+        return JsonResponse({"sensor_data_id": None})
+
 
 
 @api_view(['POST'])
@@ -66,7 +81,7 @@ def save_sensor_data(request):
 @api_view(['GET'])
 def get_all_sensors(request):
     """Получить все машины"""
-    all_sensors = Sensor.objects.all()
+    all_sensors = SensorData.objects.all()
     sensors_list = []
     for sensor in all_sensors:
         sensors_list.append({
@@ -179,7 +194,7 @@ def add_sensor_data_record(request):
     if request.method == 'POST':
         try:
             # data = json.loads(request.body)
-            data = request.data  # ✅ Django сам распарсит JSON
+            data = request.data 
 
             car_vin = data.get('car_vin')
             # user_id = data.get('user_id')
@@ -239,7 +254,8 @@ def add_sensor_data_record(request):
 def update_sensor_data_record(request, sensor_data_id): # sensor_data_id передается в URL
     if request.method == 'PUT': # Используем PUT для обновления
         try:
-            data = json.loads(request.body)
+            # data = json.loads(request.body)
+            data = request.data 
             engine_rpm = data.get('engine_rpm')
             intake_air_temperature = data.get('intake_air_temperature')
             mass_air_flow_sensor = data.get('mass_air_flow_sensor')

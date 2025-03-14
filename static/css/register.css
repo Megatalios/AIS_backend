@@ -1,0 +1,132 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden; /* Отключаем горизонтальный скролл */
+    overflow-y: auto;   /* Включаем вертикальный скролл */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex
+;
+    height: 100vh;
+    flex-direction: column;
+    /* align-items: center; */
+}
+
+.image-container {
+    position: relative; /* Родительский контейнер для позиционирования */
+    width: 100%; /* Ширина контейнера */
+    height: auto; /* Высота подстраивается под картинку */
+}
+
+
+.image-container img {
+    width: 100%; /* Картинка занимает всю ширину контейнера */
+    height: auto; /* Сохраняет пропорции */
+    display: block; /* Убирает лишние отступы */
+}
+
+
+
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    overflow: hidden;
+}
+
+.image-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-container img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.image-container h2 {
+    position: absolute;
+    top: 9.5%;
+    left: 51%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 10px 15px;
+    border-radius: 5px;
+    /* scale: 1.3; */
+}
+
+.image-container form {
+    position: absolute;
+    top: 55%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    width: 500px;
+    text-align: center;
+    scale: 1.1;
+}
+
+.image-container form input {
+    width: calc(100% - 12px); /* Чуть меньше ширина, чтобы не выходили за границы */
+    padding: 6px;
+    margin: 5px 0;
+    border: 1px solid #00cdff;
+    border-radius: 4px;
+}
+
+.image-container form button {
+    width: 100%;
+    padding: 8px;
+    background: #00cdff;
+    color: white;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px; /* Отступ между кнопками */
+    /* scale: 1.5; */
+}
+
+.image-container form button:hover {
+    background: #008bb5;
+}
+
+.login-button {
+    display: block;
+    padding: 8px;
+    background: #f4f4f4;
+    color: #333;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.login-button:hover {
+    background: #ddd;
+}
+
+.helptext {
+    display: none;
+}

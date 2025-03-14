@@ -27,6 +27,7 @@ urlpatterns = [
 
     # other URLs
     path('all/', views.get_all_cars, name='get_all_cars'),
+    path('get_car_id/', views.get_car_id, name='get_car_id'),
     path('by_brand/<str:brand_query>/', views.get_cars_by_brand, name='get_cars_by_brand'),
     path('add/', views.add_car, name='add_car'),
     path('update/<int:car_id>/', views.update_car, name='update_car'),

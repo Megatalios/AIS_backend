@@ -55,12 +55,12 @@ class UserSerializer(serializers.Serializer):
     name = serializers.CharField()
     email = serializers.EmailField()
 
-@swagger_auto_schema(
-    method='POST',
-    request_body=UserSerializer,  # Указываем сериализатор для тела запроса
-    responses={200: 'User registered successfully'}
-)
-@api_view(['POST'])
+# @swagger_auto_schema(
+#     method='POST',
+#     request_body=UserSerializer,  # Указываем сериализатор для тела запроса
+#     responses={200: 'User registered successfully'}
+# )
+# @api_view(['POST'])
 def register_view(request):
     """Регистрация пользователя"""
     if request.method == 'POST':

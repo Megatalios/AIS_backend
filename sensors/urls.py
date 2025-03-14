@@ -27,6 +27,7 @@ urlpatterns = [
      # other URLs
     path('all/', views.get_all_sensors, name='get_all_sensors'),
     path('add/', views.add_sensor_data_record, name='add_sensor_data_record'),
+    path('check/', views.check_sensor_data, name='check_sensor_data'),
     path('<int:sensor_data_id>/', views.get_sensor_data, name='get_sensor_data'),
     path('<str:car_vin>/', views.get_sensor_data_for_car, name='get_sensor_data_for_car'),
     path('update/<int:sensor_data_id>/', views.update_sensor_data_record, name='update_sensor_data_record'),

@@ -1,6 +1,40 @@
-<h2>Вход</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Войти</button>
-</form>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+
+
+<div class="image-container">
+    <h2>Авторизация</h2>
+    <img class="car2_new-size" src="{% static 'img/bmwm5f90.png' %} " alt="bmwm5f90" id="bg">
+    <form method="post">
+        {% csrf_token %}
+    
+        <label for="{{ form.username.id_for_label }}">Имя пользователя:</label>
+        {{ form.username }}
+    
+        <label for="{{ form.password1.id_for_label }}">Пароль:</label>
+        {{ form.password }}
+
+        <button type="submit">Войти</button>
+        <a href="/users/register" class="register-button">На страницу регистрации</a>
+
+    </form>
+    <!--
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Войти</button>
+        <a href="/users/register" class="register-button">На страницу регистрации</a>
+    </form>
+    -->
+</div>
+
+</body>
+</html>

@@ -9,12 +9,27 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
 from rest_framework import serializers
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
+@login_required(login_url='/users/login/') 
 def home_view(request):
-    return render(request, 'index.html')  # Показываем HTML-файл
+    return render(request, 'index.html') 
 
+@api_view(['GET'])
+def get_car_id(request):
+    """Получить id машины по VIN номеру"""
+    vin_number = request.GET.get("vin_number")
+    
+    if not vin_number:
+        return JsonResponse({"error": "VIN-номер не указан"}, status=400)
+    
+    try:
+        car = Car.objects.get(vin_number=vin_number)
+        return JsonResponse({"car_id": car.id})
+    except Car.DoesNotExist:
+        return JsonResponse({"error": "Автомобиль не найден"}, status=404)
 
-
+# @login_required(login_url='/users/login/') 
 @api_view(['GET'])
 def get_all_cars(request):
     """Получить все машины"""
