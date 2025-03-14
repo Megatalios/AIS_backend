@@ -17,3 +17,14 @@ class SensorData(models.Model):
 
     def __str__(self):
         return f"Sensor Data for Car: {self.car.brand} VIN: {self.car.vin_number} at {self.timestamp}" # Отображение в админке
+    
+
+class SensorDataCalculated(models.Model):
+    estimated_mass_air_flow_sensor = models.FloatField() # Вычисленная величина массового потока воздуха
+    estimate_injection_duration = models.FloatField() # Предполагаемая длительность впрыска
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sensor_calculated_data') # Внешний ключ к User
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='sensor_calculated_data') # Внешний ключ к Car
+
+
+    def __str__(self):
+        return f"Sensor Data Calculated for Car: {self.car.brand} VIN: {self.car.vin_number}" # Отображение в админке    
