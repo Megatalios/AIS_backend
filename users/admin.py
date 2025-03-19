@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import User  # Импортируй нужные модели
+
+# admin.site.register(User)  # Регистрируем модель в админке
+
+
